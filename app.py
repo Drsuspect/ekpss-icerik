@@ -13,6 +13,8 @@ import streamlit as st
 from streamlit_mic_recorder import speech_to_text
 from edge_tts import exceptions as edge_exc
 import edge_tts
+import io
+from gtts import gTTS
 
 # --- Cloud Ortamı İçin Asyncio Fix (Gerekirse) ---
 # Streamlit Cloud (Linux) genellikle buna ihtiyaç duymaz,
@@ -94,45 +96,37 @@ async def metni_sese_cevir(metin):
     await communicate.save("temp_audio.mp3")
 
 def ses_cal_otomatik(metin):
-    """Sesi oluşturur ve tarayıcıda çalar"""
+    """Metni gTTS ile oluşturur ve tarayıcıda çalar"""
     
-    if metin == st.session_state.last_read:
+    if not metin or metin.strip() == "" or metin == st.session_state.last_read:
         return
     
-    # Hata durumunda uygulama kilitlemesin diye deneme bloğu
     try:
-        # Hata vermediği sürece asyncio.run ile senkronize çalıştır.
-        asyncio.run(metni_sese_cevir(metin))
+        # 1. Metin temizliği (opsiyonel ama iyi)
+        metin_temiz = re.sub(r'[()\-\:?]', ' ', metin).strip()
         
-        if os.path.exists("temp_audio.mp3"):
-            # Sesi oku ve base64'e dönüştür
-            with open("temp_audio.mp3", "rb") as f:
-                audio_bytes = f.read()
+        # 2. gTTS objesi oluşturma
+        tts = gTTS(text=metin_temiz, lang='tr')
+        
+        # 3. Sesi dosyaya değil, belleğe (BytesIO) yazma
+        mp3_fp = io.BytesIO()
+        tts.write_to_fp(mp3_fp)
+        mp3_fp.seek(0)
+        audio_bytes = mp3_fp.read()
             
-            # Geçici dosyayı sil (temizlik için)
-            os.remove("temp_audio.mp3")
-                
-            audio_base64 = base64.b64encode(audio_bytes).decode()
-            
-            # HTML audio etiketi ile otomatik çalmayı sağla
-            audio_html = f"""
-                <audio autoplay="true">
-                <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
-                </audio>
-            """
-            st.markdown(audio_html, unsafe_allow_html=True)
-            st.session_state.last_read = metin
+        # 4. HTML audio etiketi ile çalma (gerisi aynı)
+        audio_base64 = base64.b64encode(audio_bytes).decode()
+        audio_html = f"""
+            <audio autoplay="true">
+            <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
+            </audio>
+        """
+        st.markdown(audio_html, unsafe_allow_html=True)
+        st.session_state.last_read = metin
             
     except Exception as e:
-        # Hata yakalandığında kullanıcıyı bilgilendir
-        if "No audio was received" in str(e) or "ValueError" in str(e):
-             st.error("Ses motoru yanıt vermedi (Ağ hatası veya Metin işlenemedi). Lütfen tekrar deneyin.")
-        else:
-            st.error(f"Genel Ses Hatası: {e}")
-        
-        # Hata durumunda last_read'i temizle ki bir sonraki sefer tekrar denesin.
+        st.error(f"gTTS Ses Hatası: {e}")
         st.session_state.last_read = ""
-
 # ==============================================================================
 # 3. PDF ANALİZİ
 # ==============================================================================
@@ -466,6 +460,7 @@ if __name__ == "__main__":
         giris_sayfasi()
     elif st.session_state.page == "UYGULAMA":
         uygulama_sayfasi()
+
 
 
 
