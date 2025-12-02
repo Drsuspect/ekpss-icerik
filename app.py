@@ -68,7 +68,7 @@ if 'mod' not in st.session_state: st.session_state.mod = "TEST" # Başlangıç m
 # ==============================================================================
 # 2. SES MOTORU
 # ==============================================================================
-async def metni_sese_cevir(metin):
+async def metni_sese_cevir("Merhaba, test"):
     communicate = edge_tts.Communicate(metin, "tr-TR-AhmetNeural")
     await communicate.save("temp_audio.mp3")
 
@@ -440,6 +440,7 @@ if __name__ == "__main__":
         giris_sayfasi()
     elif st.session_state.page == "UYGULAMA":
         uygulama_sayfasi()
+
 
 
 
