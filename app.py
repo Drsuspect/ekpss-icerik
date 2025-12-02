@@ -72,7 +72,7 @@ async def metni_sese_cevir(metin):
     communicate = edge_tts.Communicate(metin, "tr-TR-AhmetNeural")
     await communicate.save("temp_audio.mp3")
 
-def ses_cal_otomatik("Merhaba, test"):
+def ses_cal_otomatik(metin):
     """Sesi oluşturur ve tarayıcıda çalar"""
     
     # 🌟 GÜVENLİK KONTROLÜ: Metin boşsa veya sadece boşluksa çık
@@ -258,8 +258,14 @@ def giris_sayfasi():
     st.title("🗣️ EKPSS Sesli Asistan")
     st.markdown("---")
 
+    # ⚠️ TEST ÇAĞRISI BURADA! ⚠️
+    # Sayfa her yüklendiğinde "Merhaba, test" metnini okumayı dener.
+    if st.button("🔊 Sesi Test Et: Merhaba, test"):
+         ses_cal_otomatik("Merhaba, test") 
+    
     st.markdown("""
         <div class="info-box">
+      
         Bu uygulama, yüklediğiniz PDF dosyasını okuyarak size **Sesli Test Çözme** veya **Sesli Ders Çalışma** imkanı sunar.
         </div>
     """, unsafe_allow_html=True)
@@ -440,6 +446,7 @@ if __name__ == "__main__":
         giris_sayfasi()
     elif st.session_state.page == "UYGULAMA":
         uygulama_sayfasi()
+
 
 
 
