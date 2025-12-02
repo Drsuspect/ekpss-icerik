@@ -68,11 +68,11 @@ if 'mod' not in st.session_state: st.session_state.mod = "TEST" # Başlangıç m
 # ==============================================================================
 # 2. SES MOTORU
 # ==============================================================================
-async def metni_sese_cevir("Merhaba, test"):
+async def metni_sese_cevir(metin):
     communicate = edge_tts.Communicate(metin, "tr-TR-AhmetNeural")
     await communicate.save("temp_audio.mp3")
 
-def ses_cal_otomatik(metin):
+def ses_cal_otomatik("Merhaba, test"):
     """Sesi oluşturur ve tarayıcıda çalar"""
     
     # 🌟 GÜVENLİK KONTROLÜ: Metin boşsa veya sadece boşluksa çık
