@@ -82,8 +82,16 @@ async def metni_sese_cevir(metin):
 
 def ses_cal_otomatik(metin):
     """Sesi oluşturur ve tarayıcıda çalar"""
+    
+    # 🌟 GÜVENLİK KONTROLÜ: Metin boşsa veya sadece boşluksa çık
+    if not metin or metin.strip() == "":
+        st.warning("Ses motoruna boş metin gönderildi. İşlem atlanıyor.")
+        return
+        
     if metin == st.session_state.last_read:
         return
+    
+    # ... (Geri kalan kodunuz aynı kalır)
     
     # Hata durumunda uygulama kilitlemesin diye deneme bloğu
     try:
@@ -440,3 +448,4 @@ if __name__ == "__main__":
         giris_sayfasi()
     elif st.session_state.page == "UYGULAMA":
         uygulama_sayfasi()
+
