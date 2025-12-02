@@ -70,25 +70,38 @@ if 'mod' not in st.session_state: st.session_state.mod = "TEST" # Başlangıç m
 # 2. SES MOTORU
 # ==============================================================================
 async def metni_sese_cevir(metin):
-    communicate = edge_tts.Communicate(metin, "tr-TR-AhmetNeural")
+    """Metni Edge TTS ile MP3'e çevirir ve TTS kararlılığını artırır"""
+    
+    # Metin boşsa veya sadece boşluksa işlem yapma
+    if not metin or metin.strip() == "":
+        raise ValueError("Boş veya geçersiz metin gönderildi.") # Hata fırlat ki yakalansın
+
+    # Kararlılık için temizlik ve hız ayarı
+    # Soru işaretleri ve parantezler gibi işaretleri boşlukla değiştirerek TTS'i rahatlatırız.
+    metin_temiz = re.sub(r'[()\-\:?]', ' ', metin).strip()
+    
+    hiz = "+10%"
+    # Kısa metinler veya sadece rakamlar için okuma hızını ayarla
+    if len(metin_temiz) < 8 or metin_temiz.strip().isdigit():
+        metin_final = f". . {metin_temiz} . ."
+        hiz = "-10%"
+    else:
+        metin_final = metin_temiz
+        
+    # Ağ hatası riski nedeniyle timeout süresini uzatma imkanı Edge TTS'te yok.
+    # Bu nedenle kararlı parametrelerle çağırıyoruz.
+    communicate = edge_tts.Communicate(metin_final, "tr-TR-AhmetNeural", rate=hiz)
     await communicate.save("temp_audio.mp3")
 
 def ses_cal_otomatik(metin):
     """Sesi oluşturur ve tarayıcıda çalar"""
     
-    # 🌟 GÜVENLİK KONTROLÜ: Metin boşsa veya sadece boşluksa çık
-    if not metin or metin.strip() == "":
-        st.warning("Ses motoruna boş metin gönderildi. İşlem atlanıyor.")
-        return
-        
     if metin == st.session_state.last_read:
         return
     
-    # ... (Geri kalan kodunuz aynı kalır)
-    
     # Hata durumunda uygulama kilitlemesin diye deneme bloğu
     try:
-        # edge-tts'in senkron çalışması için asyncio.run kullanılır
+        # Hata vermediği sürece asyncio.run ile senkronize çalıştır.
         asyncio.run(metni_sese_cevir(metin))
         
         if os.path.exists("temp_audio.mp3"):
@@ -111,8 +124,14 @@ def ses_cal_otomatik(metin):
             st.session_state.last_read = metin
             
     except Exception as e:
-        # Streamlit arayüzünde hatayı göster
-        st.error(f"Ses oluşturma hatası: {e}")
+        # Hata yakalandığında kullanıcıyı bilgilendir
+        if "No audio was received" in str(e) or "ValueError" in str(e):
+             st.error("Ses motoru yanıt vermedi (Ağ hatası veya Metin işlenemedi). Lütfen tekrar deneyin.")
+        else:
+            st.error(f"Genel Ses Hatası: {e}")
+        
+        # Hata durumunda last_read'i temizle ki bir sonraki sefer tekrar denesin.
+        st.session_state.last_read = ""
 
 # ==============================================================================
 # 3. PDF ANALİZİ
@@ -447,6 +466,7 @@ if __name__ == "__main__":
         giris_sayfasi()
     elif st.session_state.page == "UYGULAMA":
         uygulama_sayfasi()
+
 
 
 
