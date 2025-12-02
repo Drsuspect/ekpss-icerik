@@ -9,8 +9,6 @@ import re
 import time
 import json
 import sqlite3
-import tkinter as tk
-from tkinter import filedialog # tkinter'i burada kullanmıyoruz ama uyumluluk için tutabiliriz
 import sys
 import asyncio
 
@@ -384,4 +382,5 @@ elif st.session_state.page == "TEST":
         ses_cal_otomatik(msg)
         time.sleep(4)
         st.session_state.page = "GIRIS"
+
         st.rerun()
