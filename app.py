@@ -15,10 +15,11 @@ import asyncio
 # Windows beep ayarı
 if sys.platform == "win32":
     import winsound
-    # Windows için event loop fix
+    # Sadece Windows'ta event loop fix
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 else:
     winsound = None
+
 
 # ==============================================================================
 # 1. SAYFA AYARLARI VE GÖRÜNÜM
@@ -384,3 +385,4 @@ elif st.session_state.page == "TEST":
         st.session_state.page = "GIRIS"
 
         st.rerun()
+
