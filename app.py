@@ -70,14 +70,20 @@ if 'mod' not in st.session_state: st.session_state.mod = "TEST" # Başlangıç m
 # ==============================================================================
 async def metni_sese_cevir(metin):
     """Metni Edge TTS ile MP3'e çevirir"""
+    
+    # 🌟 GÜVENLİK İYİLEŞTİRMESİ: Özel karakterleri temizle
+    # Sadece metnin okunacak kısmını tutmak kararlılığı artırır
+    metin_temiz = re.sub(r'[()\-\:]', ' ', metin).strip()
+    
     hiz = "+10%"
     # Kısa metinler veya sadece rakamlar için okuma hızını ayarla
-    if len(metin) < 8 or metin.strip().isdigit():
-        metin = f". . {metin} . ."
+    if len(metin_temiz) < 8 or metin_temiz.strip().isdigit():
+        metin_final = f". . {metin_temiz} . ."
         hiz = "-10%"
+    else:
+        metin_final = metin_temiz
 
-    communicate = edge_tts.Communicate(metin, "tr-TR-AhmetNeural", rate=hiz)
-    # Streamlit Cloud'da dosya sistemine yazılır, ardından silinir.
+    communicate = edge_tts.Communicate(metin_final, "tr-TR-AhmetNeural", rate=hiz)
     await communicate.save("temp_audio.mp3")
 
 def ses_cal_otomatik(metin):
@@ -448,4 +454,5 @@ if __name__ == "__main__":
         giris_sayfasi()
     elif st.session_state.page == "UYGULAMA":
         uygulama_sayfasi()
+
 
