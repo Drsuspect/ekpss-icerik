@@ -244,7 +244,7 @@ def reset_uygulama():
     st.session_state.index = 0
     st.session_state.score = {"dogru": 0, "yanlis": 0}
     st.session_state.last_read = ""
-    st.experimental_rerun()
+    st.rerun()
     
 def cevabi_kontrol_et(cevap):
     """Kullanıcının verdiği cevabı kontrol et ve puanı güncelle"""
@@ -411,13 +411,13 @@ def uygulama_sayfasi():
                 if st.button("⬅️ Önceki Sayfa", key="prev_ders", disabled=(st.session_state.index == 0)):
                     st.session_state.index -= 1
                     st.session_state.last_read = ""
-                    st.experimental_rerun()
+                    st.rerun()
             
             with col_next:
                 if st.button("➡️ Sonraki Sayfa", key="next_ders"):
                     st.session_state.index += 1
                     st.session_state.last_read = ""
-                    st.experimental_rerun()
+                    st.rerun()
 
 
     # ----------------------------------------------------
@@ -454,5 +454,6 @@ if __name__ == "__main__":
         giris_sayfasi()
     elif st.session_state.page == "UYGULAMA":
         uygulama_sayfasi()
+
 
 
