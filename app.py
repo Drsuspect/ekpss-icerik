@@ -11,6 +11,7 @@ import base64
 import pdfplumber
 import streamlit as st
 from streamlit_mic_recorder import speech_to_text
+from edge_tts import exceptions as edge_exc
 import edge_tts
 
 # --- Cloud Ortamı İçin Asyncio Fix (Gerekirse) ---
@@ -446,6 +447,7 @@ if __name__ == "__main__":
         giris_sayfasi()
     elif st.session_state.page == "UYGULAMA":
         uygulama_sayfasi()
+
 
 
 
